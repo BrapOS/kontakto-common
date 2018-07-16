@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package kontakto;
+
+// The Kontakto service definition
+service Kontakto {
+    // gRPC endpoint used to create a new contact
+    rpc CreateContact (CreateContactRequest) returns (CreateContactReply) {}
+    // gRPC endpoint used to modify an existing contact
+    rpc UpdateContact (UpdateContactRequest) returns (UpdateContactReply) {}
+    // gRPC endpoint used to delete a contact
+    rpc DeleteContact (DeleteContactRequest) returns (DeleteContactReply) {}
+    // gRPC endpoint used to retrieve all the contacts for a user
+    rpc GetAllContacts (GetAllContactsRequest) returns (GetAllContactsReply) {}
+}
+
+// Request / Replies
+
+message CreateContactRequest {
+    Contact contact                              = 1;
+}
+
+message CreateContactReply {
+    uint64 last_modified                         = 1; // XXX: Unix timestamp
+}
+
+message UpdateContactRequest {
+    Contact contact                              = 1;
+}
+
+message UpdateContactReply {
+    uint64 last_modified                         = 1; // XXX: Unix timestamp
+}
+
+message DeleteContactRequest {
+    bytes user_uuid                              = 1;
+    bytes contact_uuid                           = 2;
+}
+
+message DeleteContactReply {
+}
+
+message GetAllContactsRequest {
+    bytes user_uuid                              = 1;
+}
+
+message GetAllContactsReply {
+    repeated Contact contacts                    = 1;
+}
+
+// Messages
+
+// Message representing a contact.
+message Contact {
+    // Metadata
+    bytes user_uuid                              = 1;
+    bytes contact_uuid                           = 2;
+
+    // Supported fields
+    Name name                                    = 3;
+    string company                               = 4;
+    string title                                 = 5;
+    repeated PhoneNumber phone_numbers           = 6;
+    repeated EmailAddress email_addresses        = 7;
+    repeated Address addresses                   = 8;
+    repeated Event events                        = 9;
+    string group                                 = 10;
+    string notes                                 = 11;
+
+    // Custom fields
+    map<string, string> custom_fields            = 12;
+}
+
+// Message representing a name.
+message Name {
+    string first_name                            = 1;
+    string last_name                             = 2;
+    string middle_name                           = 3;
+    string prefix                                = 4;
+    string suffix                                = 5;
+}
+
+// Message representing a phone number associated with a tag.
+// Example : <"home", "123-456-7890">
+message PhoneNumber {
+    string tag                                   = 1;
+    string number                                = 2;
+}
+
+// Message representing an email address associated with a tag.
+// Example : <"work", "foo@bar.baz">
+message EmailAddress {
+    string tag                                   = 1;
+    string email_address                         = 2;
+}
+
+// Message representing an address associated with a tag.
+// The address can either be a `string` which represent the full address
+// or a `StructuredAddress` which represent the address in a structured form.
+// Example : <"school", "1 Foo St, Bar">
+message Address {
+    string tag                                   = 1;
+    oneof address {
+        string full_address                      = 2;
+        StructuredAddress structured_address     = 3;
+    }
+}
+
+// Message representing an address in a structured form.
+message StructuredAddress {
+    string civic_address                         = 1;
+    string city                                  = 2;
+    string state                                 = 3;
+    string postal_code                           = 4;
+    string country                               = 5;
+}
+
+// Message representing a date.
+message Date {
+    uint32 day                                   = 1;
+    uint32 month                                 = 2;
+    uint32 year                                  = 3;
+}
+
+// Message representing an event associated with a tag.
+// Example: <"Foo's birthday", Date>
+message Event {
+    string tag                                   = 1;
+    Date date                                    = 2;
+}
